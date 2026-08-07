@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          if [ -f apps/backend/requirements.txt ]; then pip install -r apps/backend/requirements.txt; fi
+          pip install ruff pytest
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Unit tests
+        run: pytest tests/unit
+
+      - name: MCP tests
+        run: pytest tests/integration -k mcp || true
+
+      - name: RAG tests
+        run: pytest rag/tests
+
+      - name: Integration tests
+        run: pytest tests/integration
+
+      - name: Build validation
+        run: docker compose config
