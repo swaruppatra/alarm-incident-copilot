@@ -11,6 +11,7 @@ dependencies = [
     "langchain>=1.3.14",
     "langchain-openai>=1.4.2",
     "langchain-qdrant>=1.1.0",
+    "mcp>=1.9,<2.0",
     "openai>=2.53.0",
     "pydantic>=2.13.4",
     "pydantic-settings>=2.15.0",
@@ -30,3 +31,8 @@ dev = [
 
 [tool.ruff.lint.flake8-bugbear]
 extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Header", "fastapi.Path", "fastapi.Body"]
+
+[tool.ruff.lint.per-file-ignores]
+# mcp-servers/<name>/ directory names are hyphenated per the assignment's
+# required repo structure, which N999 (invalid module name) doesn't allow for.
+"mcp-servers/**" = ["N999"]

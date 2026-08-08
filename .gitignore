@@ -34,6 +34,9 @@ rag/index/
 *.faiss
 *.sqlite3
 
+# Runtime data (e.g. the simulator's sqlite db) — outside the uvicorn --reload watch path
+/var/
+
 # OS / editor
 .DS_Store
 .idea/
