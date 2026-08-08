@@ -10,6 +10,7 @@ from simulator.app.models.alarms import Alarm
 from simulator.app.models.analytics import KPIDefinition
 from simulator.app.models.assets import AssetMetadata
 from simulator.app.models.recommendations import Recommendation
+from ticketing.app.models import Ticket, TicketStatus
 
 SEED = 42
 OUT_DIR = Path(__file__).resolve().parent.parent / "test-data"
@@ -186,6 +187,87 @@ def generate_alarms(fake: Faker, assets: list[AssetMetadata]) -> list[Alarm]:
     return alarms  # 186 total; adjust the noise count above if you want closer to 200
 
 
+# ---------- tickets ----------
+
+TICKET_LABELS_BY_ALARM = {
+    "High Vibration": ["vibration", "bearing", "mechanical"],
+    "High Discharge Pressure": ["pressure", "discharge", "process"],
+    "Low Flow": ["flow", "suction", "process"],
+}
+
+TICKET_RESOLUTION_NOTES = {
+    "High Vibration": "Realigned coupling and replaced worn bearing; vibration levels returned to baseline after re-commissioning.",
+    "High Discharge Pressure": "Cleared a partially closed downstream valve; discharge pressure normalized within 30 minutes.",
+    "Low Flow": "Cleaned the suction strainer and confirmed no cavitation on restart; flow restored to nominal.",
+}
+
+TICKET_STATUSES: list[TicketStatus] = ["open", "in_progress", "resolved", "closed"]
+
+_ticket_counter = itertools.count(1)
+
+
+def next_ticket_id() -> str:
+    return f"TKT-{next(_ticket_counter):04d}"
+
+
+def generate_tickets(assets: list[AssetMetadata], alarms: list[Alarm]) -> list[Ticket]:
+    """One ticket per (asset, alarm_name) combo with a real matching alarm,
+    plus a few generic asset-only tickets with no alarm_id, so search has
+    both alarm-linked and plain historical data to match against."""
+    alarms_by_asset_and_name: dict[tuple[str, str], list[Alarm]] = {}
+    for alarm in alarms:
+        alarms_by_asset_and_name.setdefault((alarm.asset_id, alarm.alarm_name), []).append(alarm)
+
+    tickets: list[Ticket] = []
+    for asset in assets:
+        for alarm_name in ALARM_NAMES:
+            candidates = alarms_by_asset_and_name.get((asset.asset_id, alarm_name))
+            if not candidates:
+                continue
+            alarm = random.choice(candidates)
+            ticket_status = random.choice(TICKET_STATUSES)
+            resolved = ticket_status in ("resolved", "closed")
+            created = alarm.start_time + timedelta(minutes=random.randint(5, 60))
+            tickets.append(Ticket(
+                ticket_id=next_ticket_id(),
+                summary=f"{alarm_name} on {asset.asset_name}",
+                description=(
+                    f"Investigate {alarm_name.lower()} reported on {asset.asset_name} "
+                    f"({asset.site}, {asset.unit})."
+                ),
+                status=ticket_status,
+                labels=TICKET_LABELS_BY_ALARM[alarm_name],
+                asset_id=asset.asset_id,
+                alarm_id=alarm.alarm_id,
+                priority=random.choice(["low", "medium", "high"]),
+                created_at=created,
+                updated_at=created + timedelta(hours=random.randint(1, 48)),
+                resolution_notes=TICKET_RESOLUTION_NOTES[alarm_name] if resolved else None,
+            ))
+
+    generic_tickets = [
+        ("Routine inspection follow-up", "Scheduled inspection flagged a minor anomaly requiring follow-up.", ["maintenance", "inspection"]),
+        ("Spare parts request", "Requesting spare parts be staged ahead of next planned outage.", ["logistics", "planning"]),
+        ("Documentation update needed", "Asset documentation is out of date and needs revision.", ["documentation"]),
+    ]
+    for asset, (summary, description, labels) in zip(assets[:3], generic_tickets, strict=False):
+        created = NOW - timedelta(days=random.randint(1, 60))
+        tickets.append(Ticket(
+            ticket_id=next_ticket_id(),
+            summary=f"{summary} — {asset.asset_name}",
+            description=description,
+            status=random.choice(TICKET_STATUSES),
+            labels=labels,
+            asset_id=asset.asset_id,
+            alarm_id=None,
+            priority=random.choice(["low", "medium"]),
+            created_at=created,
+            updated_at=created + timedelta(hours=random.randint(1, 24)),
+            resolution_notes=None,
+        ))
+    return tickets
+
+
 # ---------- static reference fixtures (not random, just committed directly) ----------
 
 KPI_DEFINITIONS = [
@@ -217,6 +299,7 @@ def main() -> None:
 
     assets = generate_assets(fake)
     alarms = generate_alarms(fake, assets)
+    tickets = generate_tickets(assets, alarms)
 
     OUT_DIR.mkdir(exist_ok=True)
     (OUT_DIR / "assets.json").write_text(
@@ -234,9 +317,13 @@ def main() -> None:
             indent=2,
         )
     )
+    (OUT_DIR / "tickets.json").write_text(
+        json.dumps([t.model_dump(mode="json") for t in tickets], indent=2)
+    )
     print(
         f"Wrote {len(assets)} assets, {len(alarms)} alarms, "
-        f"{len(KPI_DEFINITIONS)} KPI defs, {len(RECOMMENDATION_PLAYBOOK)} playbook entries to {OUT_DIR}"
+        f"{len(KPI_DEFINITIONS)} KPI defs, {len(RECOMMENDATION_PLAYBOOK)} playbook entries, "
+        f"{len(tickets)} tickets to {OUT_DIR}"
     )
 
 
