@@ -1,0 +1,62 @@
+[
+  {
+    "asset_id": "AST-0001",
+    "asset_name": "Boiler Feed Pump 101",
+    "site": "EastRefinery",
+    "unit": "Unit 2",
+    "asset_type": "pump",
+    "manufacturer": "Flowserve",
+    "install_date": "2020-07-20",
+    "criticality": "low"
+  },
+  {
+    "asset_id": "AST-0002",
+    "asset_name": "Boiler Feed Pump 102",
+    "site": "EastRefinery",
+    "unit": "Unit 2",
+    "asset_type": "pump",
+    "manufacturer": "Emerson",
+    "install_date": "2011-12-13",
+    "criticality": "medium"
+  },
+  {
+    "asset_id": "AST-0003",
+    "asset_name": "Compressor C-201",
+    "site": "EastRefinery",
+    "unit": "Unit 3",
+    "asset_type": "compressor",
+    "manufacturer": "Sulzer",
+    "install_date": "2015-06-14",
+    "criticality": "medium"
+  },
+  {
+    "asset_id": "AST-0004",
+    "asset_name": "Compressor C-202",
+    "site": "EastRefinery",
+    "unit": "Unit 3",
+    "asset_type": "compressor",
+    "manufacturer": "Flowserve",
+    "install_date": "2014-09-22",
+    "criticality": "low"
+  },
+  {
+    "asset_id": "AST-0005",
+    "asset_name": "Motor M-301",
+    "site": "WestRefinery",
+    "unit": "Unit 5",
+    "asset_type": "motor",
+    "manufacturer": "Siemens",
+    "install_date": "2021-11-28",
+    "criticality": "low"
+  },
+  {
+    "asset_id": "AST-0006",
+    "asset_name": "Motor M-302",
+    "site": "WestRefinery",
+    "unit": "Unit 5",
+    "asset_type": "motor",
+    "manufacturer": "Flowserve",
+    "install_date": "2021-01-26",
+    "criticality": "low"
+  }
+]

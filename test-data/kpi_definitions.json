@@ -1,0 +1,27 @@
+[
+  {
+    "kpi_name": "alarm_count",
+    "description": "Total number of alarms in the period",
+    "unit": "count"
+  },
+  {
+    "kpi_name": "recurring_rate",
+    "description": "Share of alarms that are repeat occurrences of the same alarm_name on the same asset",
+    "unit": "ratio"
+  },
+  {
+    "kpi_name": "avg_ack_delay",
+    "description": "Average time between an alarm starting and being acknowledged",
+    "unit": "seconds"
+  },
+  {
+    "kpi_name": "suppression_candidate_rate",
+    "description": "Share of alarms belonging to an (asset_id, alarm_name) pair recurring at least 3 times in the window",
+    "unit": "ratio"
+  },
+  {
+    "kpi_name": "critical_count",
+    "description": "Number of alarms with severity == critical in the period",
+    "unit": "count"
+  }
+]
