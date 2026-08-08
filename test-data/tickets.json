@@ -1,0 +1,355 @@
+[
+  {
+    "ticket_id": "TKT-0001",
+    "summary": "High Vibration on Boiler Feed Pump 101",
+    "description": "Investigate high vibration reported on Boiler Feed Pump 101 (EastRefinery, Unit 2).",
+    "status": "open",
+    "labels": [
+      "vibration",
+      "bearing",
+      "mechanical"
+    ],
+    "asset_id": "AST-0001",
+    "alarm_id": "ALM-00047",
+    "priority": "medium",
+    "created_at": "2026-07-29T01:38:00",
+    "updated_at": "2026-07-30T05:38:00",
+    "resolution_notes": null
+  },
+  {
+    "ticket_id": "TKT-0002",
+    "summary": "High Discharge Pressure on Boiler Feed Pump 101",
+    "description": "Investigate high discharge pressure reported on Boiler Feed Pump 101 (EastRefinery, Unit 2).",
+    "status": "open",
+    "labels": [
+      "pressure",
+      "discharge",
+      "process"
+    ],
+    "asset_id": "AST-0001",
+    "alarm_id": "ALM-00170",
+    "priority": "high",
+    "created_at": "2026-07-28T21:43:12",
+    "updated_at": "2026-07-30T02:43:12",
+    "resolution_notes": null
+  },
+  {
+    "ticket_id": "TKT-0003",
+    "summary": "Low Flow on Boiler Feed Pump 101",
+    "description": "Investigate low flow reported on Boiler Feed Pump 101 (EastRefinery, Unit 2).",
+    "status": "open",
+    "labels": [
+      "flow",
+      "suction",
+      "process"
+    ],
+    "asset_id": "AST-0001",
+    "alarm_id": "ALM-00025",
+    "priority": "high",
+    "created_at": "2026-06-25T23:48:00",
+    "updated_at": "2026-06-26T09:48:00",
+    "resolution_notes": null
+  },
+  {
+    "ticket_id": "TKT-0004",
+    "summary": "High Vibration on Boiler Feed Pump 102",
+    "description": "Investigate high vibration reported on Boiler Feed Pump 102 (EastRefinery, Unit 2).",
+    "status": "in_progress",
+    "labels": [
+      "vibration",
+      "bearing",
+      "mechanical"
+    ],
+    "asset_id": "AST-0002",
+    "alarm_id": "ALM-00010",
+    "priority": "high",
+    "created_at": "2026-05-12T13:29:00",
+    "updated_at": "2026-05-14T06:29:00",
+    "resolution_notes": null
+  },
+  {
+    "ticket_id": "TKT-0005",
+    "summary": "High Discharge Pressure on Boiler Feed Pump 102",
+    "description": "Investigate high discharge pressure reported on Boiler Feed Pump 102 (EastRefinery, Unit 2).",
+    "status": "resolved",
+    "labels": [
+      "pressure",
+      "discharge",
+      "process"
+    ],
+    "asset_id": "AST-0002",
+    "alarm_id": "ALM-00103",
+    "priority": "high",
+    "created_at": "2026-08-01T15:34:00",
+    "updated_at": "2026-08-03T01:34:00",
+    "resolution_notes": "Cleared a partially closed downstream valve; discharge pressure normalized within 30 minutes."
+  },
+  {
+    "ticket_id": "TKT-0006",
+    "summary": "Low Flow on Boiler Feed Pump 102",
+    "description": "Investigate low flow reported on Boiler Feed Pump 102 (EastRefinery, Unit 2).",
+    "status": "closed",
+    "labels": [
+      "flow",
+      "suction",
+      "process"
+    ],
+    "asset_id": "AST-0002",
+    "alarm_id": "ALM-00059",
+    "priority": "high",
+    "created_at": "2026-06-22T11:33:00",
+    "updated_at": "2026-06-23T15:33:00",
+    "resolution_notes": "Cleaned the suction strainer and confirmed no cavitation on restart; flow restored to nominal."
+  },
+  {
+    "ticket_id": "TKT-0007",
+    "summary": "High Vibration on Compressor C-201",
+    "description": "Investigate high vibration reported on Compressor C-201 (EastRefinery, Unit 3).",
+    "status": "open",
+    "labels": [
+      "vibration",
+      "bearing",
+      "mechanical"
+    ],
+    "asset_id": "AST-0003",
+    "alarm_id": "ALM-00017",
+    "priority": "high",
+    "created_at": "2026-07-24T15:32:00",
+    "updated_at": "2026-07-26T09:32:00",
+    "resolution_notes": null
+  },
+  {
+    "ticket_id": "TKT-0008",
+    "summary": "High Discharge Pressure on Compressor C-201",
+    "description": "Investigate high discharge pressure reported on Compressor C-201 (EastRefinery, Unit 3).",
+    "status": "in_progress",
+    "labels": [
+      "pressure",
+      "discharge",
+      "process"
+    ],
+    "asset_id": "AST-0003",
+    "alarm_id": "ALM-00142",
+    "priority": "medium",
+    "created_at": "2026-07-13T11:38:00",
+    "updated_at": "2026-07-14T02:38:00",
+    "resolution_notes": null
+  },
+  {
+    "ticket_id": "TKT-0009",
+    "summary": "Low Flow on Compressor C-201",
+    "description": "Investigate low flow reported on Compressor C-201 (EastRefinery, Unit 3).",
+    "status": "resolved",
+    "labels": [
+      "flow",
+      "suction",
+      "process"
+    ],
+    "asset_id": "AST-0003",
+    "alarm_id": "ALM-00143",
+    "priority": "medium",
+    "created_at": "2026-05-10T15:56:00",
+    "updated_at": "2026-05-11T17:56:00",
+    "resolution_notes": "Cleaned the suction strainer and confirmed no cavitation on restart; flow restored to nominal."
+  },
+  {
+    "ticket_id": "TKT-0010",
+    "summary": "High Vibration on Compressor C-202",
+    "description": "Investigate high vibration reported on Compressor C-202 (EastRefinery, Unit 3).",
+    "status": "open",
+    "labels": [
+      "vibration",
+      "bearing",
+      "mechanical"
+    ],
+    "asset_id": "AST-0004",
+    "alarm_id": "ALM-00119",
+    "priority": "medium",
+    "created_at": "2026-05-29T22:56:00",
+    "updated_at": "2026-05-30T19:56:00",
+    "resolution_notes": null
+  },
+  {
+    "ticket_id": "TKT-0011",
+    "summary": "High Discharge Pressure on Compressor C-202",
+    "description": "Investigate high discharge pressure reported on Compressor C-202 (EastRefinery, Unit 3).",
+    "status": "resolved",
+    "labels": [
+      "pressure",
+      "discharge",
+      "process"
+    ],
+    "asset_id": "AST-0004",
+    "alarm_id": "ALM-00132",
+    "priority": "low",
+    "created_at": "2026-07-26T07:30:00",
+    "updated_at": "2026-07-28T03:30:00",
+    "resolution_notes": "Cleared a partially closed downstream valve; discharge pressure normalized within 30 minutes."
+  },
+  {
+    "ticket_id": "TKT-0012",
+    "summary": "Low Flow on Compressor C-202",
+    "description": "Investigate low flow reported on Compressor C-202 (EastRefinery, Unit 3).",
+    "status": "open",
+    "labels": [
+      "flow",
+      "suction",
+      "process"
+    ],
+    "asset_id": "AST-0004",
+    "alarm_id": "ALM-00155",
+    "priority": "low",
+    "created_at": "2026-07-24T20:55:00",
+    "updated_at": "2026-07-25T02:55:00",
+    "resolution_notes": null
+  },
+  {
+    "ticket_id": "TKT-0013",
+    "summary": "High Vibration on Motor M-301",
+    "description": "Investigate high vibration reported on Motor M-301 (WestRefinery, Unit 5).",
+    "status": "open",
+    "labels": [
+      "vibration",
+      "bearing",
+      "mechanical"
+    ],
+    "asset_id": "AST-0005",
+    "alarm_id": "ALM-00094",
+    "priority": "high",
+    "created_at": "2026-08-06T08:40:00",
+    "updated_at": "2026-08-07T08:40:00",
+    "resolution_notes": null
+  },
+  {
+    "ticket_id": "TKT-0014",
+    "summary": "High Discharge Pressure on Motor M-301",
+    "description": "Investigate high discharge pressure reported on Motor M-301 (WestRefinery, Unit 5).",
+    "status": "open",
+    "labels": [
+      "pressure",
+      "discharge",
+      "process"
+    ],
+    "asset_id": "AST-0005",
+    "alarm_id": "ALM-00063",
+    "priority": "high",
+    "created_at": "2026-05-16T14:13:00",
+    "updated_at": "2026-05-18T02:13:00",
+    "resolution_notes": null
+  },
+  {
+    "ticket_id": "TKT-0015",
+    "summary": "Low Flow on Motor M-301",
+    "description": "Investigate low flow reported on Motor M-301 (WestRefinery, Unit 5).",
+    "status": "open",
+    "labels": [
+      "flow",
+      "suction",
+      "process"
+    ],
+    "asset_id": "AST-0005",
+    "alarm_id": "ALM-00023",
+    "priority": "medium",
+    "created_at": "2026-06-14T17:32:00",
+    "updated_at": "2026-06-16T12:32:00",
+    "resolution_notes": null
+  },
+  {
+    "ticket_id": "TKT-0016",
+    "summary": "High Vibration on Motor M-302",
+    "description": "Investigate high vibration reported on Motor M-302 (WestRefinery, Unit 5).",
+    "status": "open",
+    "labels": [
+      "vibration",
+      "bearing",
+      "mechanical"
+    ],
+    "asset_id": "AST-0006",
+    "alarm_id": "ALM-00101",
+    "priority": "high",
+    "created_at": "2026-05-31T20:06:00",
+    "updated_at": "2026-06-01T16:06:00",
+    "resolution_notes": null
+  },
+  {
+    "ticket_id": "TKT-0017",
+    "summary": "High Discharge Pressure on Motor M-302",
+    "description": "Investigate high discharge pressure reported on Motor M-302 (WestRefinery, Unit 5).",
+    "status": "open",
+    "labels": [
+      "pressure",
+      "discharge",
+      "process"
+    ],
+    "asset_id": "AST-0006",
+    "alarm_id": "ALM-00126",
+    "priority": "high",
+    "created_at": "2026-07-21T22:24:00",
+    "updated_at": "2026-07-22T12:24:00",
+    "resolution_notes": null
+  },
+  {
+    "ticket_id": "TKT-0018",
+    "summary": "Low Flow on Motor M-302",
+    "description": "Investigate low flow reported on Motor M-302 (WestRefinery, Unit 5).",
+    "status": "closed",
+    "labels": [
+      "flow",
+      "suction",
+      "process"
+    ],
+    "asset_id": "AST-0006",
+    "alarm_id": "ALM-00052",
+    "priority": "low",
+    "created_at": "2026-07-07T16:09:00",
+    "updated_at": "2026-07-08T15:09:00",
+    "resolution_notes": "Cleaned the suction strainer and confirmed no cavitation on restart; flow restored to nominal."
+  },
+  {
+    "ticket_id": "TKT-0019",
+    "summary": "Routine inspection follow-up \u2014 Boiler Feed Pump 101",
+    "description": "Scheduled inspection flagged a minor anomaly requiring follow-up.",
+    "status": "resolved",
+    "labels": [
+      "maintenance",
+      "inspection"
+    ],
+    "asset_id": "AST-0001",
+    "alarm_id": null,
+    "priority": "low",
+    "created_at": "2026-06-14T00:00:00",
+    "updated_at": "2026-06-14T09:00:00",
+    "resolution_notes": null
+  },
+  {
+    "ticket_id": "TKT-0020",
+    "summary": "Spare parts request \u2014 Boiler Feed Pump 102",
+    "description": "Requesting spare parts be staged ahead of next planned outage.",
+    "status": "in_progress",
+    "labels": [
+      "logistics",
+      "planning"
+    ],
+    "asset_id": "AST-0002",
+    "alarm_id": null,
+    "priority": "medium",
+    "created_at": "2026-07-02T00:00:00",
+    "updated_at": "2026-07-02T18:00:00",
+    "resolution_notes": null
+  },
+  {
+    "ticket_id": "TKT-0021",
+    "summary": "Documentation update needed \u2014 Compressor C-201",
+    "description": "Asset documentation is out of date and needs revision.",
+    "status": "open",
+    "labels": [
+      "documentation"
+    ],
+    "asset_id": "AST-0003",
+    "alarm_id": null,
+    "priority": "medium",
+    "created_at": "2026-06-19T00:00:00",
+    "updated_at": "2026-06-19T01:00:00",
+    "resolution_notes": null
+  }
+]
