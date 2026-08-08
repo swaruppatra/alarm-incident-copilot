@@ -1,0 +1,28 @@
+{
+  "High Vibration": [
+    {
+      "action": "Inspect bearing alignment and lubrication",
+      "rationale": "High vibration is most commonly caused by bearing wear or misalignment",
+      "confidence": 0.8
+    },
+    {
+      "action": "Check coupling condition",
+      "rationale": "Secondary cause if bearing inspection is clean",
+      "confidence": 0.4
+    }
+  ],
+  "High Discharge Pressure": [
+    {
+      "action": "Check downstream valve position and line blockage",
+      "rationale": "Elevated discharge pressure typically indicates restricted flow downstream",
+      "confidence": 0.75
+    }
+  ],
+  "Low Flow": [
+    {
+      "action": "Inspect suction strainer and check for cavitation",
+      "rationale": "Low flow with stable pressure often indicates a suction-side restriction",
+      "confidence": 0.7
+    }
+  ]
+}
