@@ -32,6 +32,7 @@ class Citation(BaseModel):
     source: str = Field(..., description="The source document path this citation is drawn from.")
     section: str | None = Field(None, description="The section heading within the source document.")
     score: float = Field(..., description="The relevance score for this citation.")
+    snippet: str = Field("", description="A short preview of the cited chunk's content, for display.")
 
 class RetrievalResult(BaseModel):
     query: str = Field(..., description="The original query string.")

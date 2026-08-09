@@ -16,6 +16,8 @@ from rag.retrieval.sanity_check import flag_suspicious_patterns
 
 logger = logging.getLogger("rag.retrieval")
 
+CITATION_SNIPPET_CHARS = 240
+
 
 def _build_filter(query: RetrievalQuery) -> Filter | None:
     """Build a Qdrant Filter from asset_id/doc_type, against the assets/doc_type payload fields.
@@ -67,6 +69,22 @@ def _point_to_chunk(point: ScoredPoint) -> RetrievedChunk:
     return RetrievedChunk(chunk_id=str(point.id), content=content, metadata=metadata, score=point.score)
 
 
+def _snippet(content: str) -> str:
+    """Collapse whitespace and truncate chunk content to a short display preview.
+
+    Args:
+        content (str): the chunk's full content.
+
+    Returns:
+        str: the first CITATION_SNIPPET_CHARS characters of content, whitespace-collapsed,
+            with a trailing ellipsis if it was truncated.
+    """
+    collapsed = " ".join(content.split())
+    if len(collapsed) <= CITATION_SNIPPET_CHARS:
+        return collapsed
+    return collapsed[:CITATION_SNIPPET_CHARS].rstrip() + "..."
+
+
 def retrieve(query: RetrievalQuery) -> RetrievalResult:
     """
     Retrieve relevant document chunks for a query, with an explicit confidence check.
@@ -106,7 +124,13 @@ def retrieve(query: RetrievalQuery) -> RetrievalResult:
 
     chunks = [_point_to_chunk(point) for point in points]
     citations = [
-        Citation(chunk_id=chunk.chunk_id, source=chunk.metadata.source, section=chunk.metadata.section, score=chunk.score)
+        Citation(
+            chunk_id=chunk.chunk_id,
+            source=chunk.metadata.source,
+            section=chunk.metadata.section,
+            score=chunk.score,
+            snippet=_snippet(chunk.content),
+        )
         for chunk in chunks
     ]
     return RetrievalResult(query=query.query, chunks=chunks, citations=citations, confident=True, message=None)

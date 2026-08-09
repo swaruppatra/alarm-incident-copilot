@@ -21,6 +21,7 @@ COPY simulator ./simulator
 COPY mcp-servers/alarm-management ./mcp-servers/alarm-management
 
 ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
 
 # MCP_TRANSPORT defaults to stdio (see .env.example); docker-compose.yml
 # overrides it to streamable-http so this container is reachable over the

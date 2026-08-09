@@ -5,7 +5,7 @@ services:
   alarm-api:
     build:
       context: .
-      dockerfile: mcp-servers/alarm-management/Dockerfile
+      dockerfile: simulator/Dockerfile
     env_file: .env
     ports:
       - "8000:8000"
@@ -87,22 +87,48 @@ services:
       context: .
       dockerfile: Dockerfile
     env_file: .env
+    environment:
+      # Overrides .env's localhost URLs (meant for local dev, where the MCP
+      # servers and Qdrant run as plain processes/standalone containers) --
+      # across containers this has to be the other services' Compose network
+      # names instead. If you already run Qdrant outside Compose (its port
+      # would conflict with the vector-store service below), don't edit this
+      # file -- add a docker-compose.override.yml instead, see its comment.
+      - MCP_SERVER_URL=http://alarm-mcp:9000
+      - TICKETING_MCP_SERVER_URL=http://ticketing-mcp:9100
+      - VECTOR_STORE_URL=http://vector-store:6333
     depends_on:
       alarm-mcp:
         condition: service_healthy
       ticketing-mcp:
         condition: service_healthy
+      vector-store:
+        condition: service_healthy
     ports:
       - "8080:8080"
+    volumes:
+      # Shared with copilot-frontend so the Ops tab can read audit_trail.sqlite3
+      # directly without an extra API endpoint.
+      - ./var:/app/var
 
   copilot-frontend:
     build:
-      context: ./apps/frontend
+      # Must be the repo root, not ./apps/frontend: this service imports
+      # apps.frontend.* as a namespaced package, and apps/__init__.py lives
+      # one level up from its own directory.
+      context: .
+      dockerfile: apps/frontend/Dockerfile
     env_file: .env
+    environment:
+      # Overrides .env's localhost default -- across containers this has to
+      # be copilot-backend's Compose network name instead.
+      - COPILOT_BACKEND_URL=http://copilot-backend:8080
     depends_on:
       - copilot-backend
     ports:
       - "3000:3000"
+    volumes:
+      - ./var:/app/var
 
   vector-store:
     image: qdrant/qdrant:latest

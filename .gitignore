@@ -45,3 +45,4 @@ rag/index/
 
 # Docker
 *.pid
+docker-compose.override.yml

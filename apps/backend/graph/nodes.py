@@ -22,6 +22,7 @@ from rag.retrieval.sanity_check import wrap_chunk_for_prompt
 RAG_TOOL_NAME = "search_documentation"
 MAX_TOOL_CALLS_PER_TURN = 8
 WRITE_TOOLS = {"create_ticket", "update_ticket"}
+MAX_TRACE_RESULT_CHARS = 2000
 
 # Tool names whose results represent resolved alarm/asset state -- surfaced
 # to synthesize_answer_node via state["alarm_context"] as a clean, structured
@@ -133,7 +134,27 @@ async def call_mcp_tools_node(state: AgentState) -> dict:
             break
 
         if tool_call["name"] in WRITE_TOOLS and not state.get("confirmed"):
-            pending_write = {"name": tool_call["name"], "args": tool_call["args"], "id": tool_call["id"]}
+            # OpenAI rejects any later call whose history has a tool_calls
+            # AIMessage with no matching ToolMessage -- previously this broke
+            # without responding to tool_call["id"] at all, which corrupted
+            # every subsequent turn in the thread (400: "did not have
+            # response messages"). placeholder_id lets await_confirmation_node
+            # /execute_write_node replace this placeholder with the real
+            # outcome later via add_messages' id-based upsert, instead of
+            # leaving a stale "awaiting confirmation" message in history
+            # forever.
+            placeholder_id = f"pending-write-{tool_call['id']}"
+            pending_write = {
+                "name": tool_call["name"], "args": tool_call["args"], "id": tool_call["id"],
+                "message_id": placeholder_id,
+            }
+            new_messages.append(
+                ToolMessage(
+                    id=placeholder_id,
+                    content="Awaiting user confirmation before executing this write.",
+                    tool_call_id=tool_call["id"],
+                )
+            )
             break
 
         tool = find_tool(tools, tool_call["name"])
@@ -162,12 +183,14 @@ async def call_mcp_tools_node(state: AgentState) -> dict:
 
         duration = time.monotonic() - start
         tool_call_count += 1
+        result_str = str(result)
         new_trace.append(
             McpTraceEntry(
-                name=tool_call["name"], args=tool_call["args"], duration=duration, status="success", retry_count=0
+                name=tool_call["name"], args=tool_call["args"], duration=duration, status="success", retry_count=0,
+                result=result_str[:MAX_TRACE_RESULT_CHARS],
             )
         )
-        new_messages.append(ToolMessage(content=str(result), tool_call_id=tool_call["id"]))
+        new_messages.append(ToolMessage(content=result_str, tool_call_id=tool_call["id"]))
 
         if tool_call["name"] in ALARM_CONTEXT_TOOLS:
             alarm_context_update = {**(state.get("alarm_context") or {}), tool_call["name"]: result}
@@ -280,9 +303,13 @@ async def await_confirmation_node(state: AgentState) -> dict:
     sources of a pending write into a single pending_write shape, then calls
     interrupt() with that payload so the GUI can render Approve/Reject
     controls. Execution pauses here (via a raised GraphInterrupt) until
-    resumed with Command(resume={"approved": bool}) -- per interrupt()'s
-    documented contract, this whole node re-executes from the top on resume,
-    so nothing above the interrupt() call may have a side effect.
+    resumed with Command(resume={"approved": bool, "edited_args": dict | None}).
+    edited_args, when present, replaces pending["args"] wholesale (same shape
+    the GUI was shown: {"req": {...}} for create_ticket, {"ticket_id",
+    "req": {...}} for update_ticket) so the user's edits are what actually
+    gets written, not the original draft. Per interrupt()'s documented
+    contract, this whole node re-executes from the top on resume, so nothing
+    above the interrupt() call may have a side effect.
 
     Args:
         state (AgentState): the graph state; state["ticket_draft"] and/or
@@ -290,12 +317,15 @@ async def await_confirmation_node(state: AgentState) -> dict:
 
     Returns:
         dict: partial state update. On approval: {"confirmed": True,
-            "pending_write": <normalized>} -- execute_write_node reads
-            pending_write next and clears it itself. On rejection:
-            {"confirmed": False, "pending_write": None, "ticket_draft": None}
-            -- both are cleared here, not just left alone, so a rejected
+            "pending_write": <normalized, with edited_args applied if given>}
+            -- execute_write_node reads pending_write next and clears it
+            itself. On rejection: {"confirmed": False, "pending_write": None,
+            "ticket_draft": None, "messages": [<rejection ToolMessage>] if
+            pending came from a gated raw tool call} -- pending_write/
+            ticket_draft are cleared here, not just left alone, so a rejected
             draft can't leave pending_write/ticket_draft stuck non-None and
-            force an unrelated later turn back into this same gate.
+            force an unrelated later turn back into this
+            same gate.
     """
     pending = state.get("pending_write")
     if pending is None and state.get("ticket_draft") is not None:
@@ -305,7 +335,19 @@ async def await_confirmation_node(state: AgentState) -> dict:
     approved = bool(decision.get("approved"))
 
     if not approved:
-        return {"confirmed": False, "pending_write": None, "ticket_draft": None}
+        update: dict = {"confirmed": False, "pending_write": None, "ticket_draft": None}
+        if pending and pending.get("message_id"):
+            update["messages"] = [
+                ToolMessage(
+                    id=pending["message_id"], content="Write rejected by the user; nothing was executed.",
+                    tool_call_id=pending["id"],
+                )
+            ]
+        return update
+
+    edited_args = decision.get("edited_args")
+    if edited_args is not None and pending is not None:
+        pending = {**pending, "args": edited_args}
     return {"confirmed": True, "pending_write": pending}
 
 
@@ -327,29 +369,42 @@ async def execute_write_node(state: AgentState) -> dict:
             outcome, "pending_write" and "ticket_draft" both cleared (not
             just pending_write) so a completed write can't leave ticket_draft
             stuck non-None and force the next, unrelated turn back into
-            await_confirmation via route_after_synthesize.
+            await_confirmation via route_after_synthesize. If pending came
+            from a gated raw tool call (has a message_id), "messages" carries
+            a ToolMessage with the same id replacing call_mcp_tools_node's
+            "awaiting confirmation" placeholder with the real outcome.
     """
     pending = state["pending_write"]
     tools = await get_mcp_tools()
     tool_ = find_tool(tools, pending["name"])
 
     start = time.monotonic()
+    result_str = None
     if tool_ is None:
         status_, duration = "error", 0.0
     else:
         try:
-            await tool_.ainvoke(pending["args"])
+            result_str = str(await tool_.ainvoke(pending["args"]))[:MAX_TRACE_RESULT_CHARS]
             status_ = "success"
         except Exception:  # noqa: BLE001 -- must not crash; the trace entry surfaces the failure
             status_ = "error"
         duration = time.monotonic() - start
 
-    return {
+    update: dict = {
         "mcp_trace": state.get("mcp_trace", [])
-        + [McpTraceEntry(name=pending["name"], args=pending["args"], duration=duration, status=status_, retry_count=0)],
+        + [
+            McpTraceEntry(
+                name=pending["name"], args=pending["args"], duration=duration, status=status_, retry_count=0,
+                result=result_str,
+            )
+        ],
         "pending_write": None,
         "ticket_draft": None,
     }
+    if pending.get("message_id"):
+        outcome = result_str if status_ == "success" else f"Write failed: {result_str or 'unknown error'}"
+        update["messages"] = [ToolMessage(id=pending["message_id"], content=outcome, tool_call_id=pending["id"])]
+    return update
 
 
 async def respond_node(state: AgentState) -> dict:

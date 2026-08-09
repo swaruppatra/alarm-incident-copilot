@@ -12,6 +12,7 @@ class McpTraceEntry(BaseModel):
     duration: float
     status: Literal["success", "error"]
     retry_count: int
+    result: str | None = None
 
 class IntentClassification(BaseModel):
     intent: Intent = Field(..., description="The user's primary intent for this request.")
