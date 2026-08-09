@@ -1,7 +1,7 @@
-.PHONY: install run test lint ingest up down
+.PHONY: install run up down test lint ingest eval-retrieval eval-generation
 
 install:
-	pip install -r apps/backend/requirements.txt
+	uv sync
 
 run:
 	docker compose up --build
@@ -13,10 +13,16 @@ down:
 	docker compose down
 
 test:
-	pytest tests/unit tests/integration tests/e2e rag/tests
+	uv run pytest tests/unit tests/integration tests/e2e rag/tests
 
 lint:
-	ruff check .
+	uv run ruff check .
 
 ingest:
-	python -m rag.ingestion.run --source rag/documents --target rag/index
+	uv run python -m rag.ingestion.run
+
+eval-retrieval:
+	uv run python -m rag.tests.eval_retrieval
+
+eval-generation:
+	uv run python -m rag.tests.eval_generation

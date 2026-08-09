@@ -22,7 +22,7 @@ via ASGITransport. Every line of application code between the MCP tool call
 and the sqlite row still executes for real -- this is the standard way to
 get a genuine in-process end-to-end test without standing up real sockets.
 
-For a true over-the-network run (e.g. to record for the submission video),
+For a true over-the-network run, just `cd` to the repo root and run
 `docker compose up` and drive the same 4 calls through the GUI or curl
 against the running containers -- this test's job is to prove the chaining
 logic itself is correct and to catch regressions in CI, not to replace that
