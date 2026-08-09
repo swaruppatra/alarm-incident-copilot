@@ -34,6 +34,12 @@ dev = [
     "ruff>=0.16.2",
 ]
 
+[tool.pytest.ini_options]
+# auto: async test functions run without needing an explicit
+# @pytest.mark.asyncio on every one -- most of this suite is async
+# (MCP tools, the LangGraph nodes, httpx clients).
+asyncio_mode = "auto"
+
 [tool.ruff.lint.flake8-bugbear]
 extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Header", "fastapi.Path", "fastapi.Body"]
 

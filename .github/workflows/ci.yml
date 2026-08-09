@@ -12,30 +12,34 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+      # Installs uv and, via `uv sync` below, provisions the Python version
+      # pinned by pyproject.toml's requires-python (3.11) if the runner
+      # doesn't already have one -- same tool the Dockerfile images use, so
+      # CI installs the exact dependency set (uv.lock) that's actually
+      # tested/deployed, not a hand-picked subset.
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
 
       - name: Install dependencies
-        run: |
-          if [ -f apps/backend/requirements.txt ]; then pip install -r apps/backend/requirements.txt; fi
-          pip install ruff pytest
+        run: uv sync --frozen
 
       - name: Lint
-        run: ruff check .
+        run: uv run ruff check .
 
       - name: Unit tests
-        run: pytest tests/unit
-
-      - name: MCP tests
-        run: pytest tests/integration -k mcp || true
-
-      - name: RAG tests
-        run: pytest rag/tests
+        run: uv run pytest tests/unit
 
       - name: Integration tests
-        run: pytest tests/integration
+        run: uv run pytest tests/integration
+
+      # In-process against the real simulator app + real alarm-management
+      # FastMCP server (ASGI transport, temp sqlite) -- no docker, no
+      # secrets, safe to run on every push. See tests/e2e/conftest.py.
+      - name: E2E tests (CHAIN-09 orchestration)
+        run: uv run pytest tests/e2e
+
+      - name: RAG tests
+        run: uv run pytest rag/tests
 
       - name: Build validation
         run: |

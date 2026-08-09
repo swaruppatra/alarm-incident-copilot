@@ -22,8 +22,24 @@ OPS_HEADERS = ["id", "thread_id", "event_type", "name", "status", "duration_s", 
 # the conversation still sitting in the backend's checkpoint. Persisting the
 # id in the browser itself survives a reconnect; only an explicit "New
 # conversation" click should ever mint a new one.
+#
+# Combined with the dark-mode-forcing redirect (see below) into ONE load
+# handler rather than two independent demo.load()s: a separate FORCE_DARK_JS
+# handler that does `window.location.href = ...` on first load was racing
+# this one -- the navigation could tear down the page before this handler's
+# WebSocket round trip delivered thread_id_state, leaving it stuck at "" for
+# the rest of the session (every /chat call, and therefore every Ops audit
+# row, got thread_id="" -- this is what "Ops not showing thread_id" was).
+# Doing the redirect check first and returning early keeps the two
+# concerns from ever executing out of order.
 LOAD_THREAD_ID_JS = """
 () => {
+    const url = new URL(window.location);
+    if (url.searchParams.get('__theme') !== 'dark') {
+        url.searchParams.set('__theme', 'dark');
+        window.location.href = url.href;
+        return [null, null];
+    }
     let tid = window.localStorage.getItem('copilot_thread_id');
     if (!tid) {
         tid = crypto.randomUUID();
@@ -37,19 +53,6 @@ NEW_THREAD_ID_JS = """
     const tid = crypto.randomUUID();
     window.localStorage.setItem('copilot_thread_id', tid);
     return [tid, tid];
-}
-"""
-# Gradio's dark mode is a CSS variant toggled by a `__theme` URL query param,
-# not something `theme=` on Blocks() can force by itself. A one-time redirect
-# is the standard way to pin it regardless of the visitor's OS/browser
-# preference; once the param is present this is a no-op.
-FORCE_DARK_JS = """
-() => {
-    const url = new URL(window.location);
-    if (url.searchParams.get('__theme') !== 'dark') {
-        url.searchParams.set('__theme', 'dark');
-        window.location.href = url.href;
-    }
 }
 """
 
@@ -490,7 +493,6 @@ with gr.Blocks(title="Incident and Ticket Enrichment Copilot") as demo:
         ],
     )
 
-    demo.load(fn=None, inputs=None, js=FORCE_DARK_JS)
     load_thread_event = demo.load(fn=None, inputs=None, outputs=[thread_id_state, thread_display], js=LOAD_THREAD_ID_JS)
     load_thread_event.then(
         restore_session,
