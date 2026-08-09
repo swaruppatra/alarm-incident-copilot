@@ -53,18 +53,21 @@ def get_qdrant_client() -> QdrantClient:
 
 
 def store_embeddings_in_qdrant(
-    embeddings: list[float], vector_id: str, metadata: dict, collection_name: str | None = None
+    embeddings: list[float], vector_id: str, content: str, metadata: dict, collection_name: str | None = None
 ) -> None:
     """
-    Store an embedding and its metadata in Qdrant, upserting by vector_id so
-    re-running ingestion updates an existing point's payload/vector instead
-    of creating a duplicate. Creates the collection (cosine distance) on
-    first use if it doesn't exist yet.
+    Store an embedding, its chunk text, and its metadata in Qdrant, upserting
+    by vector_id so re-running ingestion updates an existing point's payload/
+    vector instead of creating a duplicate. Creates the collection (cosine
+    distance) on first use if it doesn't exist yet.
 
     Args:
         embeddings (list[float]): The embedding vector to store.
         vector_id (str): The point's unique identifier (must be an unsigned int or UUID string).
-        metadata (dict): Chunk metadata (source, headers, frontmatter, ...) stored as the point's payload.
+        content (str): The chunk's text, stored in the payload under "content" so it
+            can be returned at retrieval time.
+        metadata (dict): Chunk metadata (source, headers, frontmatter, ...) stored
+            alongside content in the point's payload.
         collection_name (str | None): Qdrant collection name; defaults to settings.qdrant_collection_name.
 
     Returns:
@@ -82,24 +85,29 @@ def store_embeddings_in_qdrant(
 
     client.upsert(
         collection_name=collection_name,
-        points=[PointStruct(id=vector_id, vector=embeddings, payload=metadata)],
+        points=[PointStruct(id=vector_id, vector=embeddings, payload={"content": content, **metadata})],
     )
 
 
 def store_embeddings_in_qdrant_batch(
     embeddings: list[list[float]],
     vector_ids: list[str],
+    contents: list[str],
     metadatas: list[dict],
     collection_name: str | None = None,
 ) -> None:
     """
-    Store many embeddings and their metadata in Qdrant in one upsert call,
-    instead of one round-trip per point. Same upsert-by-vector_id and
-    create-if-missing (cosine distance) behavior as store_embeddings_in_qdrant.
+    Store many embeddings, their chunk texts, and their metadata in Qdrant in
+    one upsert call, instead of one round-trip per point. Same upsert-by-
+    vector_id and create-if-missing (cosine distance) behavior as
+    store_embeddings_in_qdrant.
 
     Args:
         embeddings (list[list[float]]): The embedding vectors to store.
         vector_ids (list[str]): One point ID per embedding, same order.
+        contents (list[str]): One chunk text per embedding, same order; stored
+            in each point's payload under "content" so it can be returned at
+            retrieval time.
         metadatas (list[dict]): One metadata payload per embedding, same order.
         collection_name (str | None): Qdrant collection name; defaults to settings.qdrant_collection_name.
 
@@ -119,7 +127,9 @@ def store_embeddings_in_qdrant_batch(
     client.upsert(
         collection_name=collection_name,
         points=[
-            PointStruct(id=vector_id, vector=embedding, payload=metadata)
-            for vector_id, embedding, metadata in zip(vector_ids, embeddings, metadatas, strict=True)
+            PointStruct(id=vector_id, vector=embedding, payload={"content": content, **metadata})
+            for vector_id, embedding, content, metadata in zip(
+                vector_ids, embeddings, contents, metadatas, strict=True
+            )
         ],
     )

@@ -10,15 +10,20 @@ from rag.ingestion.loader import load_markdown
 
 DOCUMENTS_DIR = Path("./rag/documents")
 
+SKIP_SECTIONS = {"Related Documents"}  # navigational, not knowledge content
+
 
 def ingest_documents(documents_dir, chunk_size=1000, chunk_overlap=200) -> list[dict]:
     """
     Ingest documents from the specified directory and chunk them.
 
-    Each document is first split on markdown headers. A header section is
-    only run through the character-based splitter when it's still too big
-    for one chunk (>= chunk_size) -- sections already under that size are
-    kept as-is, so content isn't chunked twice and duplicated.
+    Each document is first split on markdown headers. Sections in
+    SKIP_SECTIONS (e.g. "Related Documents") are dropped entirely -- they're
+    navigational cross-references, not knowledge content worth embedding. A
+    remaining header section is only run through the character-based
+    splitter when it's still too big for one chunk (>= chunk_size) --
+    sections already under that size are kept as-is, so content isn't
+    chunked twice and duplicated.
 
     Args:
         documents_dir (str | Path): The path to the directory containing the documents.
@@ -39,6 +44,9 @@ def ingest_documents(documents_dir, chunk_size=1000, chunk_overlap=200) -> list[
         header_chunks = chunk_markdown(doc_content, headers_to_split_on=[("#", "Header 1"), ("##", "Header 2")])
 
         for header_chunk in header_chunks:
+            if header_chunk.metadata.get("Header 2") in SKIP_SECTIONS:
+                continue
+
             chunk_metadata = {**doc_metadata, **header_chunk.metadata, "source": str(file_path)}
 
             if len(header_chunk.page_content) >= chunk_size:
@@ -80,9 +88,10 @@ def embed_and_store_documents(documents_dir, chunk_size=1000, chunk_overlap=200)
         chunk_index_by_source[source] = index + 1
         vector_ids.append(str(uuid.uuid5(uuid.NAMESPACE_URL, f"{source}#{index}")))
 
-    embeddings = get_embeddings_batch([chunk["content"] for chunk in chunks])
+    contents = [chunk["content"] for chunk in chunks]
     metadatas = [chunk["metadata"] for chunk in chunks]
-    store_embeddings_in_qdrant_batch(embeddings, vector_ids, metadatas)
+    embeddings = get_embeddings_batch(contents)
+    store_embeddings_in_qdrant_batch(embeddings, vector_ids, contents, metadatas)
 
     return len(chunks)
 

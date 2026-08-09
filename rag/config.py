@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     qdrant_api_key: str | None = Field(default=None, alias="QDRANT_API_KEY")
     qdrant_collection_name: str = Field(default="alarm_incident_docs", alias="QDRANT_COLLECTION_NAME")
     embedding_model: str = Field(default="text-embedding-3-small", alias="EMBEDDING_MODEL")
+    # Starting point, not tuned yet -- revisit once run against the golden set.
+    retrieval_score_threshold: float = Field(default=0.35, alias="RETRIEVAL_SCORE_THRESHOLD")
 
 
 @lru_cache
