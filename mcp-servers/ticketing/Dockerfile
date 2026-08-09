@@ -21,6 +21,7 @@ COPY ticketing ./ticketing
 COPY mcp-servers/ticketing ./mcp-servers/ticketing
 
 ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
 
 # MCP_TRANSPORT defaults to stdio (see .env.example); docker-compose.yml
 # overrides it to streamable-http so this container is reachable over the

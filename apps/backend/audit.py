@@ -133,7 +133,7 @@ def log_mcp_trace(thread_id: str, entries: list[McpTraceEntry], prompt_version: 
             entry.name,
             entry.status,
             entry.duration,
-            {"args": entry.args, "retry_count": entry.retry_count},
+            {"args": entry.args, "retry_count": entry.retry_count, "result": entry.result},
             prompt_version,
         )
 

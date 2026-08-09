@@ -17,8 +17,10 @@ RUN uv sync --frozen --no-dev --no-install-project
 
 COPY simulator ./simulator
 COPY ticketing ./ticketing
+COPY test-data ./test-data
 
 ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
 
 EXPOSE 8100
 

@@ -1,3 +1,5 @@
+from typing import Literal
+
 from mcp.server.fastmcp import FastMCP
 
 from simulator.app.models.alarms import Alarm, AlarmListResponse
@@ -76,7 +78,11 @@ async def get_alarms(
     status: str | None = None,
     page: int = 1,
     page_size: int = 50,
-    sort_by: str = "start_time",
+    # Must stay in sync with simulator/app/routers/alarms.py's SORTABLE_COLUMNS
+    # -- there is no "priority" column; "highest-priority" alarm requests
+    # should sort by severity (or use get_priority_score for the computed
+    # score), not guess at a sort_by value the API will 400 on.
+    sort_by: Literal["start_time", "severity", "status", "alarm_name"] = "start_time",
     sort_order: str = "desc",
     trace_id: str | None = None,
 ) -> AlarmListResponse:
@@ -88,7 +94,9 @@ async def get_alarms(
         status: optional exact-match status filter.
         page: 1-indexed page number.
         page_size: number of rows per page.
-        sort_by: column to sort by.
+        sort_by: column to sort by. There is no "priority" column -- for a
+            "highest-priority alarm" request, sort by "severity", or use
+            get_priority_score for the computed priority score.
         sort_order: "asc" or "desc".
         trace_id: correlation id to propagate; generated if not supplied.
 
