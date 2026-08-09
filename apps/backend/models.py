@@ -1,6 +1,7 @@
 from typing import Literal
 
 from pydantic import BaseModel, Field
+
 from ticketing.app.models import TicketCreateRequest as TicketDraft
 
 Intent = Literal["prepare_incident", "search_tickets", "summarize_alarm", "add_procedure", "general_query"]
