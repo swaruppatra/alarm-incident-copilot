@@ -1,10 +1,11 @@
+from langchain_core.documents import Document
 from langchain_text_splitters import (
     MarkdownHeaderTextSplitter,
     RecursiveCharacterTextSplitter,
 )
 
 
-def chunk_markdown(doc_content, headers_to_split_on) -> list[str]:
+def chunk_markdown(doc_content, headers_to_split_on) -> list[Document]:
     """
     Chunk markdown content into smaller pieces based on specified headers.
 
@@ -14,7 +15,8 @@ def chunk_markdown(doc_content, headers_to_split_on) -> list[str]:
             (e.g., [("#", "Header 1"), ("##", "Header 2")]).
 
     Returns:
-        list: A list of chunks, where each chunk is a string.
+        list[Document]: One Document per header section, with page_content (the
+            section text) and metadata (the Header 1/Header 2 path to that section).
     """
     # Initialize the MarkdownHeaderTextSplitter
     splitter = MarkdownHeaderTextSplitter(headers_to_split_on=headers_to_split_on)
