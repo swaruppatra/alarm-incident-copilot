@@ -4,6 +4,10 @@ An AI copilot for alarm incident triage and ticket enrichment. It combines a can
 
 **Selected use case:** Incident and Ticket Enrichment Copilot — service teams facing a high-priority alarm need a ticket created/updated with accurate alarm context, similar historical cases, and documented troubleshooting guidance, without manually cross-referencing three separate systems.
 
+## Demo Video
+
+[Watch the demo](https://drive.google.com/file/d/14qj4XPfY79sr_VMNc_SFuPyGxFrXXnA_/view?usp=sharing)
+
 ## Main Capabilities
 
 - Natural-language chat that plans and re-plans its next step turn by turn (not a fixed, hard-coded sequence) — see `docs/architecture.md`.
