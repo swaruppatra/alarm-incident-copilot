@@ -1,6 +1,6 @@
-"""Unit tests for apps/frontend/app.py's pure formatting/parsing helpers --
-no Gradio runtime, no network. Covers "citation formatting" and part of
-"payload construction"/"response parsing" from the assignment's unit test list.
+"""Unit tests for apps/frontend/app.py's pure formatting/parsing helpers —
+no Gradio runtime, no network. Covers citation formatting, and part of
+payload construction/response parsing.
 """
 
 from apps.frontend.app import (

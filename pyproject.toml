@@ -44,6 +44,6 @@ asyncio_mode = "auto"
 extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Header", "fastapi.Path", "fastapi.Body"]
 
 [tool.ruff.lint.per-file-ignores]
-# mcp-servers/<name>/ directory names are hyphenated per the assignment's
-# required repo structure, which N999 (invalid module name) doesn't allow for.
+# mcp-servers/<name>/ directory names are hyphenated, which N999 (invalid
+# module name) doesn't allow for.
 "mcp-servers/**" = ["N999"]

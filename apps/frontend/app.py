@@ -16,43 +16,40 @@ CITATION_HEADERS = ["Document", "Section", "Score", "Snippet"]
 SIMILAR_TICKETS_HEADERS = ["Tool", "Query Args", "Status", "Result"]
 OPS_HEADERS = ["id", "thread_id", "event_type", "name", "status", "duration_s", "prompt_version", "created_at", "payload"]
 
-# gr.State resets on every WebSocket reconnect (backgrounded tab, laptop
-# sleep, network blip -- all common, none of them an actual crash), which
-# would otherwise hand out a brand-new random thread_id and silently orphan
-# the conversation still sitting in the backend's checkpoint. Persisting the
-# id in the browser itself survives a reconnect; only an explicit "New
-# conversation" click should ever mint a new one.
-#
-# Combined with the dark-mode-forcing redirect (see below) into ONE load
-# handler rather than two independent demo.load()s: a separate FORCE_DARK_JS
-# handler that does `window.location.href = ...` on first load was racing
-# this one -- the navigation could tear down the page before this handler's
-# WebSocket round trip delivered thread_id_state, leaving it stuck at "" for
-# the rest of the session (every /chat call, and therefore every Ops audit
-# row, got thread_id="" -- this is what "Ops not showing thread_id" was).
-# Doing the redirect check first and returning early keeps the two
-# concerns from ever executing out of order.
+# Persisted in the browser (not a gr.State) so a reconnect (backgrounded tab,
+# laptop sleep, network blip) resumes the same thread instead of orphaning it
+# in favor of a random new one; only an explicit "New conversation" click
+# mints a new id. Deliberately NOT a gr.State: these are js=-only events
+# (fn=None), which never round-trip to the backend (see block_function.py --
+# `queue = False if fn is None`), so they can update a real component's
+# displayed value but can never persist into a gr.State (which has no DOM
+# representation and is only written by an actual fn call). Using gr.State
+# here silently left every /chat call, and therefore every Ops audit row,
+# with thread_id="" -- the Thread ID textbox looked correct because its
+# display did update, only the value fed to send_message/resolve_confirmation
+# didn't. thread_display is that real, reliably-synced component, and is now
+# read directly wherever the thread id is needed instead.
 LOAD_THREAD_ID_JS = """
 () => {
     const url = new URL(window.location);
     if (url.searchParams.get('__theme') !== 'dark') {
         url.searchParams.set('__theme', 'dark');
         window.location.href = url.href;
-        return [null, null];
+        return [null];
     }
     let tid = window.localStorage.getItem('copilot_thread_id');
     if (!tid) {
         tid = crypto.randomUUID();
         window.localStorage.setItem('copilot_thread_id', tid);
     }
-    return [tid, tid];
+    return [tid];
 }
 """
 NEW_THREAD_ID_JS = """
 () => {
     const tid = crypto.randomUUID();
     window.localStorage.setItem('copilot_thread_id', tid);
-    return [tid, tid];
+    return [tid];
 }
 """
 
@@ -244,23 +241,21 @@ def format_ops_rows(rows: list[dict]) -> list[list]:
 def new_conversation() -> tuple:
     """Reset the whole Copilot tab for a fresh conversation thread.
 
-    thread_id/thread_display are deliberately left unchanged here -- a
-    sibling JS-only click handler (see LOAD_THREAD_ID_JS/NEW_THREAD_ID_JS)
-    owns generating and persisting the thread id in the browser's
-    localStorage, so a page reload (WebSocket reconnect, tab backgrounded,
-    laptop sleep -- all of which reset every gr.State) resumes the same
-    thread instead of silently orphaning it in favor of a random new one.
+    thread_display is deliberately left unchanged here -- a sibling JS-only
+    click handler (see LOAD_THREAD_ID_JS/NEW_THREAD_ID_JS) owns generating
+    and persisting the thread id in the browser's localStorage, so a page
+    reload (WebSocket reconnect, tab backgrounded, laptop sleep) resumes the
+    same thread instead of silently orphaning it in favor of a random new one.
 
     Args:
         None
 
     Returns:
-        tuple: cleared chat history, no-op for thread id (state + display),
+        tuple: cleared chat history, no-op for thread_display,
             cleared status/panels, and a hidden ticket group.
     """
     return (
         [],
-        gr.update(),
         gr.update(),
         "",
         gr.update(visible=False),
@@ -371,7 +366,7 @@ def restore_session(thread_id: str) -> tuple:
     """Rebuild the Copilot tab from the backend's stored state for a thread.
 
     Runs after every page load (a fresh tab, or a WebSocket reconnect that
-    reset thread_id_state to LOAD_THREAD_ID_JS's restored value) so the UI
+    reset thread_display to LOAD_THREAD_ID_JS's restored value) so the UI
     reflects the backend's actual state instead of each component's
     construction-time default -- a resumed thread shows its real chat
     history/citations/trace, and a genuinely new thread (no prior state)
@@ -407,7 +402,6 @@ def restore_session(thread_id: str) -> tuple:
 
 
 with gr.Blocks(title="Incident and Ticket Enrichment Copilot") as demo:
-    thread_id_state = gr.State("")
     pending_write_state = gr.State(None)
 
     gr.Markdown("# Incident and Ticket Enrichment Copilot")
@@ -493,26 +487,26 @@ with gr.Blocks(title="Incident and Ticket Enrichment Copilot") as demo:
         ],
     )
 
-    load_thread_event = demo.load(fn=None, inputs=None, outputs=[thread_id_state, thread_display], js=LOAD_THREAD_ID_JS)
+    load_thread_event = demo.load(fn=None, inputs=None, outputs=[thread_display], js=LOAD_THREAD_ID_JS)
     load_thread_event.then(
         restore_session,
-        inputs=[thread_id_state],
+        inputs=[thread_display],
         outputs=[chatbot, status_md, ticket_group, pending_write_state, trace_df, citations_df, similar_tickets_df],
     )
 
     send_outputs = [chatbot, msg_box, status_md, ticket_group, pending_write_state, trace_df, citations_df, similar_tickets_df]
-    send_btn.click(send_message, inputs=[msg_box, chatbot, thread_id_state], outputs=send_outputs)
-    msg_box.submit(send_message, inputs=[msg_box, chatbot, thread_id_state], outputs=send_outputs)
+    send_btn.click(send_message, inputs=[msg_box, chatbot, thread_display], outputs=send_outputs)
+    msg_box.submit(send_message, inputs=[msg_box, chatbot, thread_display], outputs=send_outputs)
 
     new_conv_btn.click(
         new_conversation,
         inputs=None,
-        outputs=[chatbot, thread_id_state, thread_display, status_md, ticket_group, pending_write_state, trace_df, citations_df, similar_tickets_df],
+        outputs=[chatbot, thread_display, status_md, ticket_group, pending_write_state, trace_df, citations_df, similar_tickets_df],
     )
-    new_conv_btn.click(fn=None, inputs=None, outputs=[thread_id_state, thread_display], js=NEW_THREAD_ID_JS)
+    new_conv_btn.click(fn=None, inputs=None, outputs=[thread_display], js=NEW_THREAD_ID_JS)
 
     confirm_inputs = [
-        thread_id_state, pending_write_state, chatbot,
+        thread_display, pending_write_state, chatbot,
         summary_tb, description_tb, status_dd, priority_dd, labels_tb, asset_id_tb, alarm_id_tb, ticket_id_tb,
         resolution_notes_tb,
     ]

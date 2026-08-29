@@ -1,8 +1,8 @@
 """Unit tests for the LangGraph conditional-edge ("routing") functions in
-apps/backend/graph/nodes.py -- pure functions over AgentState, no LLM/MCP/
-Qdrant calls needed. This is the "tool selection" line item from the
-assignment's unit test list, plus regression coverage for the two
-state-hygiene bugs fixed in await_confirmation_node/execute_write_node.
+apps/backend/graph/nodes.py — pure functions over AgentState, no LLM/MCP/
+Qdrant calls needed. Covers tool-selection routing, plus regression coverage
+for the two state-hygiene bugs fixed in
+await_confirmation_node/execute_write_node.
 """
 
 from langchain_core.messages import AIMessage

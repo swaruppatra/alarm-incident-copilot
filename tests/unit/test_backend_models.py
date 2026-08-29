@@ -1,6 +1,5 @@
 """Unit tests for input validation on apps/backend's Pydantic request/response
-models (main.py, models.py) -- the "input validation" line item from the
-assignment's unit test list.
+models (main.py, models.py).
 """
 
 import pytest

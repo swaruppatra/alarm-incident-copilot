@@ -14,9 +14,9 @@
 | GUI | `apps/frontend/` (Gradio) |
 | Copilot orchestration | `apps/backend/graph/` (LangGraph `StateGraph`), `apps/backend/main.py` (FastAPI) |
 | MCP client / tool registry | `apps/backend/mcp_clients.py` (`MultiServerMCPClient`) |
-| Candidate-developed MCP servers | `mcp-servers/alarm-management/`, `mcp-servers/ticketing/` |
+| MCP servers | `mcp-servers/alarm-management/`, `mcp-servers/ticketing/` |
 | Alarm Management API (simulator) | `simulator/` |
-| Ticketing API (candidate-built mock) | `ticketing/` |
+| Ticketing API (mock) | `ticketing/` |
 | RAG ingestion pipeline | `rag/ingestion/` |
 | Retrieval service | `rag/retrieval/` |
 | Document store (source corpus) | `rag/documents/` |

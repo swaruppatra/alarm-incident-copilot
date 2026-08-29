@@ -1,8 +1,8 @@
 # Incident and Ticket Enrichment Copilot
 
-An AI copilot for alarm incident triage and ticket enrichment. It combines a candidate-built MCP server (alarm management + ticketing tools) with document RAG to turn a natural-language request into a cited, human-approved support ticket draft.
+An AI copilot for alarm incident triage and ticket enrichment. It combines purpose-built MCP servers (alarm management + ticketing tools) with document RAG to turn a natural-language request into a cited, human-approved support ticket draft.
 
-**Selected use case:** Incident and Ticket Enrichment Copilot — service teams facing a high-priority alarm need a ticket created/updated with accurate alarm context, similar historical cases, and documented troubleshooting guidance, without manually cross-referencing three separate systems.
+**Use case:** service teams facing a high-priority alarm need a ticket created/updated with accurate alarm context, similar historical cases, and documented troubleshooting guidance, without manually cross-referencing three separate systems.
 
 ## Demo Video
 
@@ -11,8 +11,8 @@ An AI copilot for alarm incident triage and ticket enrichment. It combines a can
 ## Main Capabilities
 
 - Natural-language chat that plans and re-plans its next step turn by turn (not a fixed, hard-coded sequence) — see `docs/architecture.md`.
-- Alarm and asset data via a candidate-built MCP server over the Alarm Management API (asset search, alarm retrieval, priority scoring, recommendations, correlation, flood analysis, KPI calculation, and more — see `docs/mcp-tool-catalog.md`).
-- Ticket search/create/update via a second MCP server over a candidate-built mock ticketing API, with **explicit human confirmation required before any write**.
+- Alarm and asset data via a purpose-built MCP server over the Alarm Management API (asset search, alarm retrieval, priority scoring, recommendations, correlation, flood analysis, KPI calculation, and more — see `docs/mcp-tool-catalog.md`).
+- Ticket search/create/update via a second MCP server over a mock ticketing API, with **explicit human confirmation required before any write**.
 - Grounded answers with source citations from a Markdown document corpus (troubleshooting manuals, operating procedures, safety instructions, resolution notes, etc.) via RAG over Qdrant — see `docs/rag-design.md`.
 - One combined workflow where MCP data and RAG citations appear together in the same answer, not as separate demos.
 - A GUI (chat, ticket-draft approval, MCP execution trace, RAG citations, similar tickets, and a live audit/Ops tab).
@@ -59,8 +59,8 @@ apps/
   backend/        FastAPI app + LangGraph orchestration (the copilot itself)
   frontend/        Gradio GUI (Copilot tab + Ops/audit tab)
 mcp-servers/
-  alarm-management/  Candidate MCP server #1 -- wraps the Alarm Management API
-  ticketing/          Candidate MCP server #2 -- wraps the ticketing API
+  alarm-management/  MCP server #1 — wraps the Alarm Management API
+  ticketing/          MCP server #2 — wraps the ticketing API
 simulator/          Alarm Management API simulator (FastAPI + SQLite)
 ticketing/           Ticketing API simulator (FastAPI + SQLite)
 rag/
@@ -75,8 +75,8 @@ tests/
 test-data/         Seed fixtures (assets/alarms/tickets/KPI defs) both simulators load on startup
 docs/               Everything listed in "Deliverables" -- architecture, MCP catalog, RAG design, etc.
 scripts/           One-off tooling (test-data generation)
-connectors/         Placeholder -- see "Assumptions" below
-postman/*           Reference API spec the simulator was built and validated against (outside this repo's build context; see the assignment package)
+connectors/         Placeholder — see "Assumptions" below
+postman/*           Reference API spec the simulator was built and validated against (outside this repo's build context)
 ```
 
 ## Quick Start
@@ -143,7 +143,7 @@ python -m rag.tests.eval_generation   # generation quality (incl. the adversaria
 
 ## Sample Interactions
 
-The assignment's own example questions, all supported end to end:
+Example questions the copilot handles end to end:
 
 - "Prepare an incident for the highest-priority active alarm in EastRefinery."
 - "Find similar historical tickets for this compressor alarm."
@@ -159,11 +159,11 @@ GUI → copilot backend (FastAPI + LangGraph) → either an MCP tool call (alarm
 
 ## Assumptions
 
-- One primary use case implemented completely (Incident and Ticket Enrichment Copilot), per the assignment's own instruction to prefer a smaller, fully integrated solution over a broad, incomplete one.
-- Ticketing is a candidate-built mock API (one of the assignment's explicitly supported options), not a live Jira/ServiceNow/Azure DevOps/GitHub Issues account.
+- One primary use case implemented completely (Incident and Ticket Enrichment Copilot) rather than partial coverage across several — a smaller, fully integrated workflow over a broad, incomplete one.
+- Ticketing runs against a mock API built for this project, not a live Jira/ServiceNow/Azure DevOps/GitHub Issues account.
 - The document corpus is synthetic, authored for this project and grounded in the simulator's own fixture data (assets/alarms) — not real company documents.
 - Single-user, single-host local deployment target (Docker Compose); no multi-tenant auth.
-- `connectors/` (from the suggested repo structure) is kept as an empty placeholder — this project keeps each source-system HTTP client (`AlarmManagementClient`, `TicketingClient`) alongside its own MCP server instead, so server and connector version together (see `docs/architecture.md`).
+- `connectors/` is kept as an empty placeholder — this project keeps each source-system HTTP client (`AlarmManagementClient`, `TicketingClient`) alongside its own MCP server instead, so server and connector version together (see `docs/architecture.md`).
 
 ## Known Limitations
 
