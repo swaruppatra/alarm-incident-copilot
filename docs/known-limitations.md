@@ -23,7 +23,7 @@
 
 ## Ticketing
 
-- **Mock ticketing API, not a real provider.** `ticketing/` is a candidate-built simulator, not a live Jira/Azure DevOps/ServiceNow/GitHub Issues integration — see `docs/design-decisions.md` for why.
+- **Mock ticketing API, not a real provider.** `ticketing/` is a simulator built for this project, not a live Jira/Azure DevOps/ServiceNow/GitHub Issues integration — see `docs/design-decisions.md` for why.
 
 ## GUI / Operability
 

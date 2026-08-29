@@ -26,17 +26,17 @@
 ## MCP server boundaries: two servers, split by source system
 
 - `mcp-servers/alarm-management/` and `mcp-servers/ticketing/` are separate FastMCP servers rather than one combined server.
-- Reason: each wraps exactly one source system's API, with its own auth token, its own base URL, its own client. Keeping that boundary at the server level (not just a module level) matches how they'd actually be deployed/scaled/rotated independently in production, and keeps each server "independently runnable and testable" per the assignment's requirement.
+- Reason: each wraps exactly one source system's API, with its own auth token, its own base URL, its own client. Keeping that boundary at the server level (not just a module level) matches how they'd actually be deployed/scaled/rotated independently in production, and keeps each server independently runnable and testable.
 
-## Ticketing provider: candidate-built mock API
+## Ticketing provider: mock API
 
 - Built a minimal ticketing API simulator (`ticketing/`) rather than integrating a real Jira/Azure DevOps/ServiceNow/GitHub Issues account.
-- Reason: the assignment explicitly lists this as one of the supported options, and it keeps the time box focused on the MCP+RAG integration pattern (which is what's actually graded) rather than a third-party API's specific auth flow/rate limits/sandbox account setup.
+- Reason: keeps the focus on the MCP+RAG integration pattern rather than a third-party API's specific auth flow/rate limits/sandbox account setup.
 
 ## Checkpointer: `MemorySaver`, not `SqliteSaver`
 
 - The compiled graph uses LangGraph's in-memory `MemorySaver`, not `SqliteSaver`, even though `interrupt()` requires *some* checkpointer to work at all.
-- Trade-off, taken deliberately: conversation state (mid-conversation history, any paused-awaiting-confirmation write) does not survive a backend process restart. Acceptable for this assignment's scope; flagged in `docs/known-limitations.md` as the first thing to change for anything beyond a local demo.
+- Trade-off, taken deliberately: conversation state (mid-conversation history, any paused-awaiting-confirmation write) does not survive a backend process restart. Acceptable for this project's current scope; flagged in `docs/known-limitations.md` as the first thing to change for anything beyond a local demo.
 
 ## Audit trail: direct SQLite read, not an API
 

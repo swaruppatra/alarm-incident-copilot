@@ -2,7 +2,7 @@
 
 ## Alarm Management API
 
-Candidate-built FastAPI simulator (`simulator/`), backed by the Postman collections in `postman/` and a seeded SQLite database (`test-data/*.json`, loaded once on startup). Full surface:
+FastAPI simulator (`simulator/`), backed by the Postman collections in `postman/` and a seeded SQLite database (`test-data/*.json`, loaded once on startup). Full surface:
 
 | Endpoint | Method | Purpose |
 |---|---|---|
@@ -46,7 +46,7 @@ All three are logged server-side (`trace_context` log event) for correlation acr
 
 ## Ticketing API Integration
 
-Candidate-built mock ticketing API (`ticketing/`), not a real Jira/Azure DevOps/ServiceNow/GitHub Issues integration — chosen to keep the assignment's time box focused on the MCP+RAG integration pattern rather than a third-party API's auth/rate-limit specifics. Same auth pattern as the Alarm Management API (bearer token via `TICKETING_API_TOKEN`). Endpoints:
+Mock ticketing API (`ticketing/`), not a real Jira/Azure DevOps/ServiceNow/GitHub Issues integration — chosen to keep the focus on the MCP+RAG integration pattern rather than a third-party API's auth/rate-limit specifics. Same auth pattern as the Alarm Management API (bearer token via `TICKETING_API_TOKEN`). Endpoints:
 
 | Endpoint | Method | Purpose |
 |---|---|---|
